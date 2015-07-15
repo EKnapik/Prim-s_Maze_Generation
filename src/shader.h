@@ -71,7 +71,8 @@ void setTrans( Shader *shader, GLfloat transVals[] );
 void setScale( Shader *shader, GLfloat scaleVals[] );
 
 // sets the color values for the object to be rendered with
+// values for each are between 0.0 and 1.0 where 0 is off and 1 is full on
 // public
-void setColor( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha );
+void setColor( Shader *shader, GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha );
 
 #endif
