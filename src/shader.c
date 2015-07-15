@@ -84,6 +84,7 @@ Shader* mkShader( const char *vert, const char *frag )
     shader->red = 0.933f;
     shader->green = 0.509f;
     shader->blue = 0.933f;
+    shader->alpha = 1.0f;
 
     return shader;
 }
@@ -137,10 +138,16 @@ void shaderDisplay( Shader *shader )
     glUniform3fv( lookLoc, 1, shader->lookAt );
     glUniform3fv( upVecLoc, 1, shader->upVec );
 
-    // pass the values for the lighting calculations
-    // the vertex and normals are being passed through the object
-    // display function
-    setUpLighting( shader );
+    // pass the values for the color of the shape to render
+    GLuint redLoc = glGetUniformLocation( shader->shaderProgram, "redVal" );
+    GLuint greenLoc = glGetUniformLocation( shader->shaderProgram, "greenVal" );
+    GLuint blueLoc = glGetUniformLocation( shader->shaderProgram, "blueVal" );
+    GLuint alphaLoc = glGetUniformLocation( shader->shaderProgram, "alphaVal" );
+
+    glUniform1f( redLoc, shader->red );
+    glUniform1f( greenLoc, shader->green );
+    glUniform1f( blueLoc, shader->blue );
+    glUniform1f( alphaLoc, shader->alpha );
 
     return;
 }
