@@ -23,19 +23,29 @@
 #define WindowHeight 750
 #define WindowWidth 750
 
+// Globals
+
+
 // functions
 void setupGLUT( int argc, char *argv[] );
 void render( void );
 
+
+typedef struct WallStruct {
+    unsigned int row : 15 // 15 bits allocated
+    unsigned int col : 15 // 15 bits allocated
+    unsigned int edge : 2 // 2 bits allocated (I only need 4 values)
+} Wall; // total is 4 bytes
 
 
 // Main function
 // This could have user input for maze size
 int main( int argc, char *argv[] )
 {
+    // Initialize my window for rendering using GLUT
     setupGLUT( argc, argv );
 
-    // lets start the generation
+    // Enter the display callback loop
     glutMainLoop();
     return 0; // compiler wants this though this is never hit
 }
@@ -69,9 +79,43 @@ void setupGLUT( int argc, char *argv[] )
 
 void render( void )
 {
-
     //Clear buffers
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+    // Maze and rules for maze code:
+    _Bool maze[MazeRows][MazeCols];
+    for( int row = 0; row < MazeRows; row++ )
+    {
+        for( int col = 0; col < MazeCols; col++ )
+        {
+            maze[row][col] = false; // initialzie all spaces to false
+        }
+    }
 
+    int totalCells = MazeRows * MazeCols;
+    int cellsInMaze = 0;
+
+    Wall *wallArray;
+    int wallArraySize = 0;
+
+    // Initialize first cell to be added
+    int curRow = 0;
+    int curCol = 0;
+    maze[curRow][curCol] = true; // this cell is now in the maze
+    wallArraySize = addWalls( *wallArray, wallArraySize, curRow, curCol );
+    // render current position as red
+
+    // Enter the the minimum spanning tree loop of adding cells to the maze
+    while( wallArraySize > 0 )
+    {
+        // Render current position as white
+        // Determine next position by random choice from wall Array
+        // Set that position as current
+        // set maze at current position to true meaning it is in the maze
+        // add current position's walls to the maze
+        // render current position as red
+    }
+
+    // clean up pointers
+    free( wallArray );
 }
