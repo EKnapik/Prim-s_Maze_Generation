@@ -49,12 +49,15 @@ int totalCells = MazeRows * MazeCols;
 int cellsInMaze = 0;
 Wall *wallArray;
 int wallArraySize = 0;
+int curRow = 0;
+int curCol = 0;
+_Bool firstPass = true;
 
 // functions
 void setupGLUT( int argc, char *argv[] );
 void render( void );
-void addWalls( int row, int col );
-void setNextPosition( int *curRow, int *curCol );
+void addWalls();
+void setNextPosition();
 
 // Main function
 // This could have user input for maze size
@@ -62,6 +65,16 @@ int main( int argc, char *argv[] )
 {
     // Initialize my window for rendering using GLUT
     setupGLUT( argc, argv );
+
+    // Initilize the maze
+    wallArraySize = 0;
+    for( int row = 0; row < MazeRows; row++ )
+    {
+        for( int col = 0; col < MazeCols; col++ )
+        {
+            maze[row][col] = false; // initialzie all spaces to false
+        }
+    }
 
     // Enter the display callback loop
     glutMainLoop();
@@ -85,7 +98,7 @@ void setupGLUT( int argc, char *argv[] )
     glEnable( GL_CULL_FACE );
 
     // set the background color
-    glClearColor( 0.0, 0.0, 0.0, 1.0 ); // black full alpha
+    glClearColor( 0.0, 0.0, 1.0, 1.0 ); // blue full alpha
 
     glCullFace( GL_BACK );
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -97,45 +110,44 @@ void setupGLUT( int argc, char *argv[] )
 
 void render( void )
 {
-    //Clear buffers
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    // Maze and rules for maze code:
-    wallArraySize = 0;
-    for( int row = 0; row < MazeRows; row++ )
-    {
-        for( int col = 0; col < MazeCols; col++ )
-        {
-            maze[row][col] = false; // initialzie all spaces to false
-        }
-    }
+    // Do not clear buffers because I draw one cell
+    // and leave that cell
 
     // Initialize first cell to be added
-    int curRow = 0;
-    int curCol = 0;
-    maze[curRow][curCol] = true; // this cell is now in the maze
-    addWalls( curRow, curCol );
-    // render current position as red
+    if (firstPass == true ) {
+        firstPass = false;
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    // Enter the the minimum spanning tree loop of adding cells to the maze
-    while( wallArraySize > 0 )
-    {
+        curRow = 0;
+        curCol = 0;
+        maze[curRow][curCol] = true; // this cell is now in the maze
+        addWalls();
+        // render current position as red
+
+    } else { // Enter the the minimum spanning tree loop of adding cells to the maze
         // Render current position as white
         // Determine next position by random choice from wall Array
-        setNextPosition( &curRow, &curCol );
+        printf( "Here1\n" );
+        setNextPosition();
+        printf( "Here2\n" );
         // set maze at current position to true meaning it is in the maze
         maze[curRow][curCol] = true; // this cell is now in the maze
         // add current position's walls to the maze
-        addWalls( curRow, curCol );
+        addWalls();
+        printf( "Here3\n" );
         // render current position as red
     }
+    glutSwapBuffers();
 
-    // clean up pointers
-    free( wallArray );
+    if (wallArraySize > 0 || cellsInMaze < totalCells) {
+        glutPostRedisplay();
+    }
 }
 
 
-void addWalls( int row, int col )
+// Using the current Global curRow and the curCol
+// will add that cell's walls to the global wall array
+void addWalls()
 {
     if( wallArraySize < 1 )
     {
@@ -144,40 +156,40 @@ void addWalls( int row, int col )
 
     Wall wall;
     // try and add top
-    if( (row-1) > 0 )
+    if( (curRow-1) > 0 )
     {
-        wall.row = row;
-        wall.col = col; 
+        wall.row = curRow;
+        wall.col = curCol; 
         wall.edge = TOP;
         wallArraySize++;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize));
         wallArray[wallArraySize-1] = wall;
     }
     // try and add bottom
-    if( (row+1) < MazeRows )
+    if( (curRow+1) < MazeRows )
     {
-        wall.row = row;
-        wall.col = col; 
+        wall.row = curRow;
+        wall.col = curCol; 
         wall.edge = BOTTOM;
         wallArraySize++;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize));
         wallArray[wallArraySize-1] = wall;
     }
     // try and add left
-    if( (col-1) > 0 )
+    if( (curCol-1) > 0 )
     {
-        wall.row = row;
-        wall.col = col; 
+        wall.row = curRow;
+        wall.col = curCol; 
         wall.edge = LEFT;
         wallArraySize++;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize));
         wallArray[wallArraySize-1] = wall;
     }
     // try and add right
-    if( (col+1) < MazeCols )
+    if( (curCol+1) < MazeCols )
     {
-        wall.row = row;
-        wall.col = col; 
+        wall.row = curRow;
+        wall.col = curCol; 
         wall.edge = RIGHT;
         wallArraySize++;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize));
@@ -187,7 +199,10 @@ void addWalls( int row, int col )
 
 
 
-void setNextPosition( int *curRow, int *curCol )
+// Using the current global curRow and curCol
+// will set the next cell that is going to
+// be added to the maze, for the next loop
+void setNextPosition()
 {
     srand(time(NULL));
     int randomNum; 
@@ -204,8 +219,8 @@ void setNextPosition( int *curRow, int *curCol )
         {
             if( !maze[wall.row+1][wall.col] ) // all non added cells are false
             {
-                *curRow = wall.row+1;
-                *curCol = wall.col;
+                curRow = wall.row+1;
+                curCol = wall.col;
                 return;
             }
         }
@@ -213,8 +228,8 @@ void setNextPosition( int *curRow, int *curCol )
         {
             if( !maze[wall.row-1][wall.col] ) 
             {
-                *curRow = wall.row-1;
-                *curCol = wall.col;
+                curRow = wall.row-1;
+                curCol = wall.col;
                 return;
             }
         }
@@ -222,8 +237,8 @@ void setNextPosition( int *curRow, int *curCol )
         {
             if( !maze[wall.row][wall.col+1] ) 
             {
-                *curRow = wall.row;
-                *curCol = wall.col+1;
+                curRow = wall.row;
+                curCol = wall.col+1;
                 return;
             }
         }
@@ -231,8 +246,8 @@ void setNextPosition( int *curRow, int *curCol )
         {
             if( !maze[wall.row][wall.col-1] ) 
             {
-                *curRow = wall.row;
-                *curCol = wall.col-1;
+                curRow = wall.row;
+                curCol = wall.col-1;
                 return;
             }
         }
