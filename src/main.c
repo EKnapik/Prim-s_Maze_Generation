@@ -76,6 +76,8 @@ int main( int argc, char *argv[] )
         }
     }
 
+    // initialize random number
+    srand(time(NULL));
     // Enter the display callback loop
     glutMainLoop();
     return 0; // compiler wants this though this is never hit
@@ -131,6 +133,8 @@ void render( void )
         setNextPosition();
         printf( "Here2\n" );
         // set maze at current position to true meaning it is in the maze
+        printf( "Row: %d\n", curRow );
+        printf( "Col: %d\n", curCol );
         maze[curRow][curCol] = true; // this cell is now in the maze
         // add current position's walls to the maze
         addWalls();
@@ -204,17 +208,25 @@ void addWalls()
 // be added to the maze, for the next loop
 void setNextPosition()
 {
-    srand(time(NULL));
     int randomNum; 
     Wall wall;
 
     while( wallArraySize > 0 )
     {
         randomNum = rand() % wallArraySize;    
-        wall = wallArray[randomNum]; // get the wall at random place
+        // need to assign each element to get the wall at random place
+        wall = wallArray[randomNum];
+        wall.row = wallArray[randomNum].row;
+        wall.col = wallArray[randomNum].col;
+        wall.edge = wallArray[randomNum].edge;
         wallArraySize--; // I just removed a wall
-        wallArray[randomNum] = wallArray[wallArraySize]; // replace position with last wall
+        // replace position with last wall need to assign all 3
+        wallArray[randomNum] = wallArray[wallArraySize];
+        wallArray[randomNum].row = wallArray[wallArraySize].row;
+        wallArray[randomNum].col = wallArray[wallArraySize].col;
+        wallArray[randomNum].edge = wallArray[wallArraySize].edge;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize)); // resize the array
+
         if( TOP == wall.edge )
         {
             if( !maze[wall.row+1][wall.col] ) // all non added cells are false
