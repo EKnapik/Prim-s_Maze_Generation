@@ -129,16 +129,13 @@ void render( void )
     } else { // Enter the the minimum spanning tree loop of adding cells to the maze
         // Render current position as white
         // Determine next position by random choice from wall Array
-        printf( "Here1\n" );
         setNextPosition();
-        printf( "Here2\n" );
         // set maze at current position to true meaning it is in the maze
-        printf( "Row: %d\n", curRow );
-        printf( "Col: %d\n", curCol );
+        // printf( "Row: %d\n", curRow );
+        // printf( "Col: %d\n", curCol );
         maze[curRow][curCol] = true; // this cell is now in the maze
         // add current position's walls to the maze
         addWalls();
-        printf( "Here3\n" );
         // render current position as red
     }
     glutSwapBuffers();
@@ -164,7 +161,7 @@ void addWalls()
     {
         wall.row = curRow;
         wall.col = curCol; 
-        wall.edge = TOP;
+        wall.edge = BOTTOM;
         wallArraySize++;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize));
         wallArray[wallArraySize-1] = wall;
@@ -174,7 +171,7 @@ void addWalls()
     {
         wall.row = curRow;
         wall.col = curCol; 
-        wall.edge = BOTTOM;
+        wall.edge = TOP;
         wallArraySize++;
         wallArray = realloc(wallArray, (sizeof(Wall) * wallArraySize));
         wallArray[wallArraySize-1] = wall;
